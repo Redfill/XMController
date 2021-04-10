@@ -1,0 +1,163 @@
+//////////////////////////////////////////
+//                                      //
+//     ctrl_placer.mel - mel script     //
+//                                      //
+//////////////////////////////////////////
+//
+// Copyright ©2021 Xavier Magher
+//
+// DESCRIPTION:	 
+//    quicly setup controllers located in the ctrl_placer_plugin folder
+//
+//////////////////////////////////////////////////////////////////////
+
+
+
+if (`window -exists Xctrl`){
+    deleteUI Xctrl;
+}
+
+
+global string $buffer;
+global string $cont;
+
+// add the nomenclature UI, 
+// allows other proc to use its textfield
+global proc addNumUI(){
+    global string $buffer;
+    global string $cont;
+    
+    string $bufferNUM = "_ctrl_srtBuffer";
+    string $contNUM = "_ctrl";
+    
+    columnLayout;
+    text -l "buffer" -w 150 -h 25 -fn "boldLabelFont"  -al left -bgc .2 .2 .3;
+    $buffer = `textFieldGrp //-tcc "BufferUpdate()"
+                                -columnWidth 1 0
+                                -columnWidth 2 150
+                                -text $bufferNUM -label "buffer"`;
+    text -l "controller" -al left;
+    $cont = `textFieldGrp //-tcc "BufferUpdate()"
+                                -columnWidth 1 0
+                                -columnWidth 2 150
+                                -text $contNUM -label "cont"`;
+                                
+}
+
+//get the script directories
+global proc string getMelFld(int $x){
+    string $scriptfld = `internalVar -userScriptDir`;
+    string $dir = $scriptfld + "/ctrl_placer_plugin/";
+    string $ImgFld = $scriptfld + "/ctrl_placer_plugin/ctrl_img/";
+    string $MelFld = $scriptfld + "/ctrl_placer_plugin/ctrl_mel/";
+    switch ($x){
+        case 0:
+        return $dir;
+        break;
+        
+        case 1:
+        return $ImgFld;
+        break;
+        
+        case 2:
+        return $MelFld;
+        break;
+    }
+}
+
+// get the file in the script directory
+global proc string[] getCtrlFile(){
+    string $ImgFld = getMelFld(1);
+    string $MelFld = getMelFld(2);
+    string $CtrlFile[] = `getFileList -fld $MelFld`;
+    return $CtrlFile;
+}
+
+
+
+
+// import and sets up the controllers
+global proc AddCtrl(string $button)
+{
+	string $label = `iconTextButton -q -l $button`;
+    string $MelFld = getMelFld(2);
+    string $CtrlFile[] = getCtrlFile();
+    global string $buffer;
+    global string $cont;
+    string $b = `textFieldGrp -q -text $buffer`;
+    string $c = `textFieldGrp -q -text $cont`;
+
+	string $selected[] = `ls -sl`;
+    select -r $selected;
+    
+    for($n = 0; $n < (`size($selected)`) ; $n++){
+        
+    //get the world position and rotation of object
+    float $pos[] = `xform -q -ws -t $selected[$n]`;
+    float $rot[] = `xform -q -ws -ro $selected[$n]`;
+      
+	file -import -type "mayaBinary" -mnc true -ns "Imported" ($MelFld + $CtrlFile[int($label)]);
+	select "Imported:*";
+	string $ss[] = `ls -sl -tr`;
+	for ($s = 0; $s < (`size($ss)`); $s++){
+	    // check if specific object is a grp
+	    if(!size(`listRelatives -shapes $ss[$s]`)){
+	    setAttr ($ss[$s] + ".tx") $pos[0];
+	    setAttr ($ss[$s] + ".ty") $pos[1];
+	    setAttr ($ss[$s] + ".tz") $pos[2];
+	    setAttr ($ss[$s] + ".rx") $rot[0];
+	    setAttr ($ss[$s] + ".ry") $rot[1];
+	    setAttr ($ss[$s] + ".rz") $rot[2];
+	    string $newbuffer = $selected[$n] + $b;
+	    rename $ss[$s] $newbuffer;
+	    }
+	    else{
+	        string $newcont = $selected[$n] + $c;
+	        rename $ss[$s] $newcont;
+	    }
+	}
+	
+	
+	select -r $selected;
+
+	}
+}
+
+
+//windows
+window -title "crtl creator" -widthHeight 100 100 Xctrl;
+
+string $cH1 = `columnLayout -adj true  `;
+//top menu
+ menuBarLayout;
+    menu -l "File";
+        string $dir = getMelFld(0);
+        menuItem -l "open file location" -c ("launch -dir $dir");
+        menuItem -l "Exit" -c "deleteUI Xctrl";
+    menu -l "help";
+        string $website = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        menuItem -l "product page" -c ("launch -web $website");
+ //ui to set the nomanclature of the controllers
+ frameLayout -l "nomanclature" -cll true -cl true -w 150 -bgc .2 .2 .3;
+
+ addNumUI();
+ 
+ //ui for controller placment
+ setParent $cH1; 
+ frameLayout -w 310 -l "create controller" -cll true -bgc .5 .2 .2 ;
+ 
+ //grid of buttons
+ gridLayout -nc 3 -cwh 150 150 ;
+ string $MelFld = getMelFld(2);
+ string $CtrlFile[] = `getFileList -fld $MelFld`;
+ 
+ //goes threw the plugin folder and add the buttons
+ for($n = 0; $n < (`size($CtrlFile)`) ; $n++){
+    string $butt = `iconTextButton -l ($n)`;
+    string $PNGFile = `substitute "mb" $CtrlFile[$n] "png"`;
+	iconTextButton -style "iconOnly" -i (`getMelFld(1)` + $PNGFile) -e -c ("AddCtrl "+$butt) $butt;
+ }
+ 
+ 
+ showWindow Xctrl;
+ window -e -wh 455 500 Xctrl;

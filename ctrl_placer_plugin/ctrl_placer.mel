@@ -1,0 +1,29 @@
+if (`window -exists Xctrl`){
+    deleteUI Xctrl;
+}
+global proc pressButton(string $button)
+{
+	string $label = `button -q -l $button`;
+	//print ($list[(int)$label]);
+	print($label);
+}
+
+
+
+window -title "orient joint" -widthHeight 320 200 Xctrl;
+ frameLayout -w 310 -l "Orient joint" -bgc .2 .2 .2 ;
+ string $scriptfld = `internalVar -userScriptDir`;
+ string $ImgFld = $scriptfld + "/ctrl_placer_plugin/ctrl_img/";
+ string $CtrlFile[] = `getFileList -fld $ImgFld`;
+ print($CtrlFile);
+ 
+ for($n = 0; $n < (`size($CtrlFile)`) ; $n++){
+    string $butt = `button -l ($n)`;
+	button -e -c ("pressButton "+$butt) $butt;
+ }
+ 
+ iconTextButton -style "iconOnly" -i (`internalVar -userScriptDir` + "/ctrl_placer_plugin/ctrl_img/" + $CtrlFile[1]);
+ 
+
+ 
+ showWindow Xctrl;
