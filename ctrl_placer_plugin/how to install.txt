@@ -1,0 +1,4 @@
+1: drag all the file in your maya script folder
+    windows: documument/maya/version/scripts/
+
+2: go in the ctrl_placer_plugin folder, open laucher.mel in the script editor and make a shelf button
