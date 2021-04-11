@@ -137,7 +137,7 @@ proc search(string $bList[], string $search){
         if(size($s) == 0){
             $vis = 1;
         }
-         iconTextButton -e -vis $vis $bList[$b];  
+         iconTextButton -e -en $vis $bList[$b];  
         //print($button);
     }
 }
