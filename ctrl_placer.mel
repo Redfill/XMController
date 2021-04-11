@@ -13,8 +13,8 @@
 
 
 
-if (`window -exists Xctrl`){
-    deleteUI Xctrl;
+if (`window -exists XMctrl`){
+    deleteUI XMctrl;
 }
 
 
@@ -31,12 +31,12 @@ global proc addNumUI(){
     string $contNUM = "_ctrl";
     
     columnLayout;
-    text -l "buffer" -w 150 -h 25 -fn "boldLabelFont"  -al left -bgc .2 .2 .3;
+    text -l "buffer:" -w 150 -h 25 -fn "boldLabelFont"  -al left ;
     $buffer = `textFieldGrp //-tcc "BufferUpdate()"
                                 -columnWidth 1 0
                                 -columnWidth 2 150
                                 -text $bufferNUM -label "buffer"`;
-    text -l "controller" -al left;
+    text -l "controller:" -al left -fn "boldLabelFont";
     $cont = `textFieldGrp //-tcc "BufferUpdate()"
                                 -columnWidth 1 0
                                 -columnWidth 2 150
@@ -124,7 +124,7 @@ global proc AddCtrl(string $button)
 	}
 }
 
-
+//search function
 proc search(string $bList[], string $search){
     string $s =`textFieldGrp -q -text $search`;
     
@@ -137,8 +137,7 @@ proc search(string $bList[], string $search){
         if(size($s) == 0){
             $vis = 1;
         }
-         iconTextButton -e -en $vis $bList[$b];  
-        //print($button);
+         iconTextButton -e -en $vis $bList[$b]; 
     }
 }
 
@@ -147,9 +146,13 @@ string $MelFld = getMelFld(2);
 string $CtrlFile[] = `getFileList -fld $MelFld`;
 string $getButton[];
 
+global proc InfoPage()
+{
+    system "load https://github.com/Redfill/XMController" ;
+}
 
 //windows
-window -title "crtl creator" -widthHeight 100 100 Xctrl;
+window -title "XM crtl creator" -widthHeight 100 100 XMctrl;
 
 string $cH1 = `columnLayout -adj true  `;
 //top menu
@@ -159,8 +162,7 @@ string $cH1 = `columnLayout -adj true  `;
         menuItem -l "open file location" -c ("launch -dir $dir");
         menuItem -l "Exit" -c "deleteUI Xctrl";
     menu -l "help";
-        string $website = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-        menuItem -l "product page" -c ("launch -web $website");
+        menuItem -l "product page" -c ("InfoPage()");
  //ui to set the nomanclature of the controllers
  frameLayout -l "nomanclature" -cll true -cl true -w 150 -bgc .2 .2 .3;
 
@@ -170,7 +172,7 @@ string $cH1 = `columnLayout -adj true  `;
  setParent $cH1; 
  frameLayout -w 310 -l "create controller" -cll true -bgc .5 .2 .2 ;
  
- string $searchCtrl = `textFieldGrp -ann "search for a controller"  -l "search" -cc "search($getButton, $searchCtrl)"`;
+ string $searchCtrl = `textFieldGrp -ann "search for a controller"  -l "search:" -cc "search($getButton, $searchCtrl)"`;
  
  //grid of buttons
  gridLayout -nc 3 -cwh 150 150 ;
@@ -188,5 +190,5 @@ string $cH1 = `columnLayout -adj true  `;
 
  
  
- showWindow Xctrl;
- window -e -wh 455 500 Xctrl;
+ showWindow XMctrl;
+ window -e -wh 455 500 XMctrl;
