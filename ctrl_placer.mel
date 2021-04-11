@@ -4,7 +4,7 @@
 //                                      //
 //////////////////////////////////////////
 //
-// Copyright ©2021 Xavier Magher
+// Copyright ï¿½2021 Xavier Magher
 //
 // DESCRIPTION:	 
 //    quicly setup controllers located in the ctrl_placer_plugin folder
@@ -80,6 +80,7 @@ global proc string[] getCtrlFile(){
 global proc AddCtrl(string $button)
 {
 	string $label = `iconTextButton -q -l $button`;
+	print($button);
     string $MelFld = getMelFld(2);
     string $CtrlFile[] = getCtrlFile();
     global string $buffer;
@@ -96,7 +97,7 @@ global proc AddCtrl(string $button)
     float $pos[] = `xform -q -ws -t $selected[$n]`;
     float $rot[] = `xform -q -ws -ro $selected[$n]`;
       
-	file -import -type "mayaBinary" -mnc true -ns "Imported" ($MelFld + $CtrlFile[int($label)]);
+	file -import -type "mayaBinary" -mnc true -ns "Imported" ($MelFld + $label);
 	select "Imported:*";
 	string $ss[] = `ls -sl -tr`;
 	for ($s = 0; $s < (`size($ss)`); $s++){
@@ -124,6 +125,29 @@ global proc AddCtrl(string $button)
 }
 
 
+proc search(string $bList[], string $search){
+    string $s =`textFieldGrp -q -text $search`;
+    
+    for($b = 0; $b < (`size($bList)`) ; $b++){
+        string $button = `iconTextButton -q -l $bList[$b]`;
+        int $vis = 0;
+        if(size(`match $s $button`) >= 1){
+            $vis = 1;
+        }
+        if(size($s) == 0){
+            $vis = 1;
+        }
+         iconTextButton -e -en $vis $bList[$b];  
+        //print($button);
+    }
+}
+
+
+string $MelFld = getMelFld(2);
+string $CtrlFile[] = `getFileList -fld $MelFld`;
+string $getButton[];
+
+
 //windows
 window -title "crtl creator" -widthHeight 100 100 Xctrl;
 
@@ -146,17 +170,22 @@ string $cH1 = `columnLayout -adj true  `;
  setParent $cH1; 
  frameLayout -w 310 -l "create controller" -cll true -bgc .5 .2 .2 ;
  
+ string $searchCtrl = `textFieldGrp -ann "search for a controller"  -l "search" -cc "search($getButton, $searchCtrl)"`;
+ 
  //grid of buttons
  gridLayout -nc 3 -cwh 150 150 ;
- string $MelFld = getMelFld(2);
- string $CtrlFile[] = `getFileList -fld $MelFld`;
  
  //goes threw the plugin folder and add the buttons
  for($n = 0; $n < (`size($CtrlFile)`) ; $n++){
-    string $butt = `iconTextButton -l ($n)`;
+    string $butt = `iconTextButton -l ($CtrlFile[$n])`;
     string $PNGFile = `substitute "mb" $CtrlFile[$n] "png"`;
-	iconTextButton -style "iconOnly" -i (`getMelFld(1)` + $PNGFile) -e -c ("AddCtrl "+$butt) $butt;
+	iconTextButton -style "iconOnly" -i (`getMelFld(1)` + $PNGFile) -ann $CtrlFile[$n] -e -c ("AddCtrl "+$butt) $butt;
+	$getButton[$n] = $butt;
  }
+
+
+ 
+
  
  
  showWindow Xctrl;
