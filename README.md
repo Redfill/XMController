@@ -7,5 +7,4 @@
 TO DO:
 
 1: add more controllers
-2: make instruction on how to add custom controllers
-3: work on the ui
+2: work on the ui
