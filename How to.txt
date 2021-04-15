@@ -1,0 +1,15 @@
+HOW TO INSTALL:
+
+	1: drag all the file in your maya script folder
+  	  windows: documument/maya/version/scripts/
+
+	2: go in the ctrl_placer_plugin folder, open laucher.mel in the script editor and make a shelf button
+
+
+
+HOW TO ADD NEW CONTROLLERS:
+
+	1: make your shape(controller) child of a group
+	2: export the group to a .mb file to documument/maya/version/scripts/ctrl_placer_plugin/ctrl_mel/
+	3: save a .png icon of the controller with the exact same name as the controller inside the .../ctrl_placer_plugin/ctrl_img
+	4: close and reopen the plugin window and your new controller should show up
