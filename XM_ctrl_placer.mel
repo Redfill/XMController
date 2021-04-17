@@ -47,9 +47,9 @@ global proc addNumUI(){
 //get the script directories
 global proc string getMelFld(int $x){
     string $scriptfld = `internalVar -userScriptDir`;
-    string $dir = $scriptfld + "/ctrl_placer_plugin/";
-    string $ImgFld = $scriptfld + "/ctrl_placer_plugin/ctrl_img/";
-    string $MelFld = $scriptfld + "/ctrl_placer_plugin/ctrl_mel/";
+    string $dir = $scriptfld + "/XM_ctrl_placer_plugin/";
+    string $ImgFld = $scriptfld + "/XM_ctrl_placer_plugin/ctrl_img/";
+    string $MelFld = $scriptfld + "/XM_ctrl_placer_plugin/ctrl_mel/";
     switch ($x){
         case 0:
         return $dir;
@@ -125,7 +125,7 @@ global proc AddCtrl(string $button)
 }
 
 //search function
-proc search(string $bList[], string $search){
+global proc search(string $bList[], string $search){
     string $s =`textFieldGrp -q -text $search`;
     
     for($b = 0; $b < (`size($bList)`) ; $b++){
@@ -160,7 +160,7 @@ string $cH1 = `columnLayout -adj true  `;
     menu -l "File";
         string $dir = getMelFld(0);
         menuItem -l "open file location" -c ("launch -dir $dir");
-        menuItem -l "Exit" -c "deleteUI Xctrl";
+        menuItem -l "Exit" -c "deleteUI XMctrl";
     menu -l "help";
         menuItem -l "product page" -c ("InfoPage()");
  //ui to set the nomanclature of the controllers
