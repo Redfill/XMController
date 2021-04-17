@@ -1,4 +1,0 @@
-global proc Ctrl_launch(){
-    source ctrl_placer.mel;
-}
-Ctrl_launch();
