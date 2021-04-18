@@ -1,1 +1,4 @@
-source XM_ctrl_placer.mel;
+string $ScriptsPath = `internalVar -userScriptDir`;
+string $FolderName = "XM_ctrl_placer_plugin";
+string $scriptFolder = ($ScriptsPath + $FolderName + "/");
+eval("source \""+ $scriptFolder + "XM_ctrl_placer.mel\"");
