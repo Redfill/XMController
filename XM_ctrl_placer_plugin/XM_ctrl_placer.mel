@@ -132,11 +132,13 @@ global proc AddCtrl(string $button)
 //search function
 global proc search(string $bList[], string $search){
     string $s =`textFieldGrp -q -text $search`;
+    string $sL = `tolower $s`;
     
     for($b = 0; $b < (`size($bList)`) ; $b++){
         string $button = `iconTextButton -q -l $bList[$b]`;
+        string $buttonL = `tolower $button`;
         int $vis = 0;
-        if(size(`match $s $button`) >= 1){
+        if(size(`match $sL $buttonL`) >= 1){
             $vis = 1;
         }
         if(size($s) == 0){
