@@ -20,6 +20,7 @@ if (`window -exists XMctrl`){
 
 global string $buffer;
 global string $cont;
+global string $rename;
 
 // add the nomenclature UI, 
 // allows other proc to use its textfield
@@ -42,6 +43,11 @@ global proc addNumUI(){
                                 -columnWidth 2 150
                                 -text $contNUM -label "cont"`;
                                 
+}
+
+global proc addRenameBoxUI(){
+    global string $rename;
+     string $rename = `checkBox -v true -l "rename ctrl"`;
 }
 
 //get the script directories
@@ -85,8 +91,10 @@ global proc AddCtrl(string $button)
     string $CtrlFile[] = getCtrlFile();
     global string $buffer;
     global string $cont;
+    global string $rename;
     string $b = `textFieldGrp -q -text $buffer`;
     string $c = `textFieldGrp -q -text $cont`;
+    string $r = `checkBox -q -v $rename`;
 
 	string $selected[] = `ls -sl`;
     select -r $selected;
@@ -106,6 +114,7 @@ global proc AddCtrl(string $button)
 	select "Imported:*";
 	string $ss[] = `ls -sl -tr`;
 	for ($s = 0; $s < (`size($ss)`); $s++){
+	    
 	    // check if specific object is a grp
 	    if(!size(`listRelatives -shapes $ss[$s]`)){
 	    setAttr ($ss[$s] + ".tx") $pos[0];
@@ -115,11 +124,22 @@ global proc AddCtrl(string $button)
 	    setAttr ($ss[$s] + ".ry") $rot[1];
 	    setAttr ($ss[$s] + ".rz") $rot[2];
 	    string $newbuffer = $selected[$n] + $b;
+	    if($r == 0){
+	        $newbuffer = substituteAllString($ss[$s], "Imported", "");
+	    }
+	        
 	    rename $ss[$s] $newbuffer;
+	
 	    }
 	    else{
-	        string $newcont = $selected[$n] + $c;
-	        rename $ss[$s] $newcont;
+	                
+	    string $newcont = $selected[$n] + $c;
+	    if($r == 0){
+	        $newcont = substituteAllString($ss[$s], "Imported", "");
+	    }
+	    
+	    rename $ss[$s] $newcont;
+	            
 	    }
 	}
 	
@@ -179,17 +199,19 @@ string $cH1 = `columnLayout -adj true  `;
  setParent $cH1; 
  frameLayout -w 310 -l "create controller" -cll true -bgc .5 .2 .2 ;
  
- string $searchCtrl = `textFieldGrp -ann "search for a controller"  -l "search:" -cc "search($getButton, $searchCtrl)"`;
- 
+ rowLayout -nc 2 ;
+ string $searchCtrl = `textFieldGrp -ann "search for a controller"  -cw 1 40 -l "search:" -cc "search($getButton, $searchCtrl)"`;
+ addRenameBoxUI();
  //grid of buttons
+ setParent ..;
  gridLayout -nc 3 -cwh 150 150 ;
  
  //goes threw the plugin folder and add the buttons
  for($n = 0; $n < (`size($CtrlFile)`) ; $n++){
     string $butt = `iconTextButton -l ($CtrlFile[$n])`;
     string $PNGFile = `substitute "mb" $CtrlFile[$n] "png"`;
+    $getButton[$n] = $butt;
 	iconTextButton -style "iconOnly" -i (`getMelFld(1)` + $PNGFile) -ann $CtrlFile[$n] -e -c ("AddCtrl "+$butt) $butt;
-	$getButton[$n] = $butt;
  }
 
 
