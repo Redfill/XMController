@@ -18,27 +18,27 @@ if (`window -exists XMctrl`){
 }
 
 
-global string $buffer;
-global string $cont;
-global string $rename;
+global string $XMCtrlbuffer;
+global string $XMCtrlcont;
+global string $XMCtrlrename;
 
 // add the nomenclature UI, 
 // allows other proc to use its textfield
 global proc addNumUI(){
-    global string $buffer;
-    global string $cont;
+    global string $XMCtrlbuffer;
+    global string $XMCtrlcont;
     
     string $bufferNUM = "_ctrl_srtBuffer";
     string $contNUM = "_ctrl";
     
     columnLayout;
     text -l "buffer:" -w 150 -h 25 -fn "boldLabelFont"  -al left ;
-    $buffer = `textFieldGrp //-tcc "BufferUpdate()"
+    $XMCtrlbuffer = `textFieldGrp //-tcc "BufferUpdate()"
                                 -columnWidth 1 0
                                 -columnWidth 2 150
                                 -text $bufferNUM -label "buffer"`;
     text -l "controller:" -al left -fn "boldLabelFont";
-    $cont = `textFieldGrp //-tcc "BufferUpdate()"
+    $XMCtrlcont = `textFieldGrp //-tcc "BufferUpdate()"
                                 -columnWidth 1 0
                                 -columnWidth 2 150
                                 -text $contNUM -label "cont"`;
@@ -46,8 +46,8 @@ global proc addNumUI(){
 }
 
 global proc addRenameBoxUI(){
-    global string $rename;
-     string $rename = `checkBox -v true -l "rename ctrl"`;
+    global string $XMCtrlrename;
+     string $XMCtrlrename = `checkBox -v true -ann "rename controllers to selected object" -l "rename ctrl"`;
 }
 
 //get the script directories
@@ -89,12 +89,12 @@ global proc AddCtrl(string $button)
 	print($button);
     string $MelFld = getMelFld(2);
     string $CtrlFile[] = getCtrlFile();
-    global string $buffer;
-    global string $cont;
-    global string $rename;
-    string $b = `textFieldGrp -q -text $buffer`;
-    string $c = `textFieldGrp -q -text $cont`;
-    string $r = `checkBox -q -v $rename`;
+    global string $XMCtrlbuffer;
+    global string $XMCtrlcont;
+    global string $XMCtrlrename;
+    string $b = `textFieldGrp -q -text $XMCtrlbuffer`;
+    string $c = `textFieldGrp -q -text $XMCtrlcont`;
+    string $r = `checkBox -q -v $XMCtrlrename`;
 
 	string $selected[] = `ls -sl`;
     select -r $selected;
@@ -106,23 +106,15 @@ global proc AddCtrl(string $button)
     
     for($n = 0; $n < (`size($selected)`) ; $n++){
         
-    //get the world position and rotation of object
-    float $pos[] = `xform -q -ws -t $selected[$n]`;
-    float $rot[] = `xform -q -ws -ro $selected[$n]`;
-      
 	file -import -type "mayaBinary" -mnc true -ns "Imported" ($MelFld + $label);
 	select "Imported:*";
 	string $ss[] = `ls -sl -tr`;
 	for ($s = 0; $s < (`size($ss)`); $s++){
 	    
 	    // check if specific object is a grp
-	    if(!size(`listRelatives -shapes $ss[$s]`)){
-	    setAttr ($ss[$s] + ".tx") $pos[0];
-	    setAttr ($ss[$s] + ".ty") $pos[1];
-	    setAttr ($ss[$s] + ".tz") $pos[2];
-	    setAttr ($ss[$s] + ".rx") $rot[0];
-	    setAttr ($ss[$s] + ".ry") $rot[1];
-	    setAttr ($ss[$s] + ".rz") $rot[2];
+	    string $LongName[] = `ls -l $ss`;
+	    if(size(`match "|" $LongName[$s]`) == 0){
+	    matchTransform -piv -pos -rot $ss[$s] $selected[$n];
 	    string $newbuffer = $selected[$n] + $b;
 	    if($r == 0){
 	        $newbuffer = substituteAllString($ss[$s], "Imported", "");
@@ -137,7 +129,7 @@ global proc AddCtrl(string $button)
 	    if($r == 0){
 	        $newcont = substituteAllString($ss[$s], "Imported", "");
 	    }
-	    
+	    //print(`ls -l $ss[$s]`);
 	    rename $ss[$s] $newcont;
 	            
 	    }
@@ -191,7 +183,7 @@ string $cH1 = `columnLayout -adj true  `;
     menu -l "help";
         menuItem -l "product page" -c ("InfoPage()");
  //ui to set the nomanclature of the controllers
- frameLayout -l "nomanclature" -cll true -cl true -w 150 -bgc .2 .2 .3;
+ frameLayout -l "nomenclature" -cll true -cl true -w 150 -bgc .2 .2 .3;
 
  addNumUI();
  
