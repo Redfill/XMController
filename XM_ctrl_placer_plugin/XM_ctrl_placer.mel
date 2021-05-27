@@ -21,6 +21,7 @@ if (`window -exists XMctrl`){
 global string $XMCtrlbuffer;
 global string $XMCtrlcont;
 global string $XMCtrlrename;
+global string $XMCtrlgroup;
 
 // add the nomenclature UI, 
 // allows other proc to use its textfield
@@ -47,7 +48,9 @@ global proc addNumUI(){
 
 global proc addRenameBoxUI(){
     global string $XMCtrlrename;
+    global string $XMCtrlgroup;
      string $XMCtrlrename = `checkBox -v true -ann "rename controllers to selected object" -l "rename ctrl"`;
+     string $XMCtrlgroup = `checkBox -v true -ann "put controller inside of a group" -l "group ctrl"`;
 }
 
 //get the script directories
@@ -80,7 +83,17 @@ global proc string[] getCtrlFile(){
 }
 
 
+global proc string GetLongName(string $name){
+    string $long[] = `ls -l $name`;
+    return $long[0];
+}
 
+global proc int GetHNumber(string $name){
+    string $longname[] = ls("-l", $name);
+    string $tokens[];
+    tokenize($longname[0], "|", $tokens);
+    return size($tokens);
+}
 
 // import and sets up the controllers
 global proc AddCtrl(string $button)
@@ -92,9 +105,11 @@ global proc AddCtrl(string $button)
     global string $XMCtrlbuffer;
     global string $XMCtrlcont;
     global string $XMCtrlrename;
+    global string $XMCtrlgroup;
     string $b = `textFieldGrp -q -text $XMCtrlbuffer`;
     string $c = `textFieldGrp -q -text $XMCtrlcont`;
     string $r = `checkBox -q -v $XMCtrlrename`;
+    string $g = `checkBox -q -v $XMCtrlgroup`;
 
 	string $selected[] = `ls -sl`;
     select -r $selected;
@@ -105,16 +120,19 @@ global proc AddCtrl(string $button)
     
     
     for($n = 0; $n < (`size($selected)`) ; $n++){
-        
-	file -import -type "mayaBinary" -mnc true -ns "Imported" ($MelFld + $label);
+    if($g == 0){    
+	    file -import -type "mayaBinary" -mnc true -ns "Imported" ($MelFld + $label);
+	}
+	else{
+	    file -import -type "mayaBinary" -gr -gn "Imported:" -mnc true -ns "Imported" ($MelFld + $label);    
+	}
 	select "Imported:*";
 	string $ss[] = `ls -sl -tr`;
 	for ($s = 0; $s < (`size($ss)`); $s++){
 	    
 	    // check if specific object is a root
-	    string $LongName[] = `ls -l $ss`;
-	    if(size(`match "|" $LongName[$s]`) == 0){
-	    matchTransform -piv -pos -rot $ss[$s] $selected[$n];
+	    if(GetHNumber(GetLongName($ss[$s])) <= 1){
+	        matchTransform -piv -pos -rot (GetLongName($ss[$s])) $selected[$n];
 	    string $newbuffer = $selected[$n] + $b;
 	    if($r == 0){
 	        $newbuffer = substituteAllString($ss[$s], "Imported", "");
@@ -191,7 +209,7 @@ string $cH1 = `columnLayout -adj true  `;
  setParent $cH1; 
  frameLayout -w 310 -l "create controller" -cll true -bgc .5 .2 .2 ;
  
- rowLayout -nc 2 ;
+ rowLayout -nc 3 ;
  string $searchCtrl = `textFieldGrp -ann "search for a controller"  -cw 1 40 -l "search:" -cc "search($getButton, $searchCtrl)"`;
  addRenameBoxUI();
  //grid of buttons
