@@ -115,7 +115,13 @@ global proc AddCtrl(string $button)
     select -r $selected;
     //if nothing is selected simply import the controller
     if(`size($selected)` == 0){
+        if($g == 0){
         file -import -type "mayaBinary" -mnc true  ($MelFld + $label);
+        }
+        else{
+            print($label);
+            file -import -type "mayaBinary" -gr -gn $label -mnc true  ($MelFld + $label);
+            }
     }
     
     
