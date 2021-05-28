@@ -1,7 +1,7 @@
 # XMController
  a maya script to quickly add controllers, with a flexible system to add custom ones
 
-![image](https://i.imgur.com/kKbwpc6.png)
+![image](https://i.imgur.com/2SqF7GV.png)
 
 
 TO DO:
