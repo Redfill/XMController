@@ -8,5 +8,4 @@ TO DO:
 
 1: add more controllers
 2: work on the ui
-3: more option on how to add the controller
-4: rewrite in python
+
