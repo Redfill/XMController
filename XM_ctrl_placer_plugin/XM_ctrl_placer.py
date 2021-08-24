@@ -62,7 +62,7 @@ def AddCtrl(but,grp,re, buffer, cont, *args):
         if(g == 0):
             cmds.file((getMayaFld(2) + Label), i=True, type = "mayaBinary", mnc=True,)
         else:
-            cmds.file((getMayaFld(2) + Label), i=True, type="mayaBinary", gr=True, gn=Label, mnc=True, ns="XMImported")
+            cmds.file((getMayaFld(2) + Label), i=True, type="mayaBinary", gr=True, gn=Label, mnc=True)
     #action for every selected objects
     for n in selected:
         if(g == 0):
@@ -73,6 +73,7 @@ def AddCtrl(but,grp,re, buffer, cont, *args):
 
         ss = cmds.ls(sl=True, tr=True)
         for s in ss:
+            print(s)
             #apply buffer actions if s is a root
             if(len(cmds.ls(s, l=True)[0].split("|")) == 2):
                 cmds.matchTransform(s , n,piv=True, pos=True, rot=True)
@@ -85,7 +86,6 @@ def AddCtrl(but,grp,re, buffer, cont, *args):
                 if(r == 0):
                     newCont = str.replace(s, "XMImported:", "")
                 cmds.rename(s, newCont)
-
     
 class XMctrl(object):   
     #constructor
@@ -127,7 +127,8 @@ class XMctrl(object):
 
         #controllers Ui
         cmds.setParent(u=True)
-        cmds.gridLayout( nc=3, cwh = (self.size[0]/3,self.size[1]/3) )
+        cmds.scrollLayout(h=self.size[1]/1.2)
+        cmds.gridLayout( nc=4, cwh = (self.size[0]/4,self.size[1]/4) )
 
         #create controller buttons
         for i in getCtrlFile():
