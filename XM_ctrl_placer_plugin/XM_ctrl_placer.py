@@ -127,7 +127,7 @@ class XMctrl(object):
 
         #controllers Ui
         cmds.setParent(u=True)
-        cmds.gridLayout( nc=3, cwh = (old_div(self.size[0],3),old_div(self.size[1],3)) )
+        cmds.gridLayout( nc=3, cwh = (self.size[0]/3,self.size[1]/3) )
 
         #create controller buttons
         for i in getCtrlFile():
