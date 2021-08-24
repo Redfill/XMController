@@ -1,6 +1,7 @@
+from __future__ import division
 ##########################################
 ##                                      ##
-##    ctrl_placer.mel - python script   ##
+##    XM_ctrl_placer.py - python script ##
 ##                                      ##
 ##########################################
 ##
@@ -11,7 +12,6 @@
 
 import maya.cmds as cmds
 from functools import partial
-import string
 
 #get maya script folders
 def getMayaFld(x):
@@ -78,12 +78,12 @@ def AddCtrl(but,grp,re, buffer, cont, *args):
                 cmds.matchTransform(s , n,piv=True, pos=True, rot=True)
                 newBuffer = n+b
                 if(r == 0):
-                    newBuffer = string.replace(s, "XMImported:", "")
+                    newBuffer = str.replace(s, "XMImported:", "")
                 cmds.rename(s, newBuffer)
             else:
                 newCont = n + c
                 if(r == 0):
-                    newCont = string.replace(s, "XMImported:", "")
+                    newCont = str.replace(s, "XMImported:", "")
                 cmds.rename(s, newCont)
 
     
@@ -127,11 +127,11 @@ class XMctrl(object):
 
         #controllers Ui
         cmds.setParent(u=True)
-        cmds.gridLayout( nc=3, cwh = (self.size[0]/3,self.size[1]/3) )
+        cmds.gridLayout( nc=3, cwh = (old_div(self.size[0],3),old_div(self.size[1],3)) )
 
         #create controller buttons
         for i in getCtrlFile():
-            PNGfile = string.replace(i,".mb", ".png")
+            PNGfile = str.replace(i,".mb", ".png")
             button = cmds.iconTextButton(label=i)
             buttonlist.append(button)
             cmds.iconTextButton(button, e=True, style="iconOnly", i=(getMayaFld(1) + PNGfile), ann=i, command=partial(AddCtrl, button, CtrlGroup, CtrlRename, XMctrlBuffer, XMctrlCont))
