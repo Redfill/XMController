@@ -11,7 +11,86 @@ from __future__ import division
 ##    quicly setup controllers located in the ctrl_placer_plugin folder
 
 import maya.cmds as cmds
+import maya.OpenMaya as om
 from functools import partial
+
+
+
+def getKnots(crvShape=None):
+    mObj = om.MObject()
+    sel = om.MSelectionList()
+    sel.add(crvShape)
+    sel.getDependNode(0, mObj)
+
+    fnCurve = om.MFnNurbsCurve(mObj)
+    tmpKnots = om.MDoubleArray()
+    fnCurve.getKnots(tmpKnots)
+
+    return [tmpKnots[i] for i in range(tmpKnots.length())]
+
+def validateCurve(crv=None):
+    '''Checks whether the transform we are working with is actually a curve and returns it's shapes'''
+    if cmds.nodeType(crv) == "transform" and cmds.nodeType(cmds.listRelatives(crv, c=1, s=1)[0]) == "nurbsCurve":
+        crvShapes = cmds.listRelatives(crv, c=1, s=1)
+    elif cmds.nodeType(crv) == "nurbsCurve":
+        crvShapes = cmds.listRelatives(cmds.listRelatives(crv, p=1)[0], c=1, s=1)
+    else:
+        cmds.error("The object " + crv + " passed to validateCurve() is not a curve")
+    return crvShapes
+
+
+def getShape(crv=None):
+    '''Returns a dictionary containing all the necessery information for rebuilding the passed in crv.'''
+    crvShapes = validateCurve(crv)
+
+    crvShapeList = []
+
+    for crvShape in crvShapes:
+        crvShapeDict = {
+            "points": [],
+            "knots": [],
+            "form": cmds.getAttr(crvShape + ".form"),
+            "degree": cmds.getAttr(crvShape + ".degree"),
+            "colour": cmds.getAttr(crvShape + ".overrideColor")
+        }
+        points = []
+
+        for i in range(cmds.getAttr(crvShape + ".controlPoints", s=1)):
+        	points.append(cmds.getAttr(crvShape + ".controlPoints[%i]" % i)[0])
+
+        crvShapeDict["points"] = points
+        crvShapeDict["knots"] = getKnots(crvShape)
+
+        crvShapeList.append(crvShapeDict)
+
+    return crvShapeList
+
+
+def setShape(crv, crvShapeList):
+    '''Creates a new shape on the crv transform, using the properties in the crvShapeDict.'''
+    crvShapes = validateCurve(crv)
+
+    oldColour = cmds.getAttr(crvShapes[0] + ".overrideColor")
+    cmds.delete(crvShapes)
+
+    for i, crvShapeDict in enumerate(crvShapeList):
+        tmpCrv = cmds.curve(p=crvShapeDict["points"], k=crvShapeDict["knots"], d=crvShapeDict["degree"], per=bool(crvShapeDict["form"]))
+        newShape = cmds.listRelatives(tmpCrv, s=1)[0]
+        cmds.parent(newShape, crv, r=1, s=1)
+
+        cmds.delete(tmpCrv)
+        newShape = cmds.rename(newShape, crv + "Shape" + str(i + 1).zfill(2))
+
+        cmds.setAttr(newShape + ".overrideEnabled", 1)
+
+
+def replaceCurve():
+    selected = cmds.ls(sl=True)
+    shapedict = getShape(selected[0])
+
+    for sel in selected[1:]:
+        setShape(sel, shapedict)
+
 
 #get maya script folders
 def getMayaFld(x):
@@ -107,9 +186,14 @@ class XMctrl(object):
 
         ch1 = cmds.columnLayout(adj=True)
 
+        cmds.frameLayout(l="utils", cll=True, cl=True)
+        cmds.button(l="replace curve", c="replaceCurve()")
+
+
         #import options
 
         #controller nomenclature tab
+        cmds.setParent(ch1)
         cmds.frameLayout(l="nomenclature", cll=True, cl=True, bgc=(0.2,0.2,0.3))
         XMctrlBuffer = cmds.textFieldGrp(l="Buffer:", text="_ctrl_srtBuffer")
         XMctrlCont = cmds.textFieldGrp(l="Controller:", text="_ctrl")
